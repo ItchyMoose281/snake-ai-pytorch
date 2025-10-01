@@ -3,7 +3,7 @@ from IPython import display
 
 plt.ion()
 
-def plot(scores, mean_scores, reward):
+def plot(scores, mean_scores, mean_scores_10, reward):
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()
@@ -15,6 +15,7 @@ def plot(scores, mean_scores, reward):
     plt.ylabel('Score')
     plt.plot(scores)
     plt.plot(mean_scores)
+    plt.plot(mean_scores_10)
 
     plt.subplot(2, 1, 2)
     plt.ylabel('Reward')
@@ -27,12 +28,6 @@ def plot(scores, mean_scores, reward):
     plt.pause(.1)
 
 
-#def plot_r(reward):
-    #display.clear_output(wait=True)
-    #display.display(plt.gcf())
-    #plt.clf()
-    #plt.xlabel('Number of Games')
-    #plt.ylabel('Reward')
-    #plt.plot(reward)
+
 
 

@@ -24,7 +24,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
 
 BLOCK_SIZE = 20
-SPEED = 200
+SPEED = 1000
 
 TIME_REWARD_MULTIPLIER = 0.01
 
@@ -86,10 +86,10 @@ class SnakeGameAI:
         # 4. place new food or just move
         if self.head == self.food:
             self.score += 1
-            reward = 10 / (self.frame_iteration / 1000)
+            reward = 10 / (self.frame_iteration / 1000) + 10 + self.score
             self._place_food()
-            print('Reward', reward)
-            print('Frame', self.frame_iteration)
+            #print('Reward', reward)
+            #print('Frame', self.frame_iteration)
         else:
             self.snake.pop()
 
@@ -126,6 +126,7 @@ class SnakeGameAI:
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
         pygame.display.flip()
+
 
 
     def _move(self, action):

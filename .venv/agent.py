@@ -19,7 +19,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 3)
+        self.model = Linear_QNet(15, 512, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -34,6 +34,26 @@ class Agent:
         dir_r = game.direction == Direction.RIGHT
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
+
+        tail_l = 0
+        tail_r = 0
+        tail_u = 0
+        tail_d = 0
+
+        for tail in game.snake[1:]:
+            if tail[1] == head.y:
+                tail_l = (max(head.x - tail[0], 0) - 0) / (640 - 0)
+                tail_r = (max(tail[0] - head.x, 0) - 0) / (640 - 0)
+                break
+
+            if tail[0] == head.x:
+                tail_u = (max(head.y - tail[1], 0) - 0) / (480 - 0)
+                tail_d = (max(tail[1] - head.y, 0) - 0) / (480 - 0)
+                break
+        #print(f'L [{tail_l}, R [{tail_r}], U [{tail_u}], D [{tail_d}]')
+
+
+
 
         state = [
             # Danger straight
@@ -64,7 +84,13 @@ class Agent:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y  # food down
+            game.food.y > game.head.y,  # food down
+
+            # Tail
+            tail_l,
+            tail_r,
+            tail_u,
+            tail_d
             ]
 
         return np.array(state, dtype=int)
@@ -105,6 +131,8 @@ class Agent:
 def train():
     plot_scores = []
     plot_mean_scores = []
+    past_10_scores = []
+    plot_mean_scores_10 = []
     plot_reward = []
     total_score = 0
     record = 0
@@ -129,6 +157,7 @@ def train():
         # remember
         agent.remember(state_old, final_move, reward, state_new, done)
 
+
         if done:
             # train long memory, plot result
             game.reset()
@@ -140,13 +169,24 @@ def train():
                 record = score
                 agent.model.save()
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             plot_scores.append(score)
+
+            past_10_scores.append(score)
+
+            if len(past_10_scores) > 10:
+                past_10_scores.pop(0)
+
+            mean_score_10 = sum(past_10_scores) / 10
+            plot_mean_scores_10.append(mean_score_10)
+
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores, plot_reward)
+
+            plot(plot_scores, plot_mean_scores, plot_mean_scores_10, plot_reward)
+
+            print('Game', agent.n_games, 'Score', score, 'Average', mean_score, 'Ten-Average', mean_score_10, 'Record:', record, '')
 
 if __name__ == '__main__':
     train()
